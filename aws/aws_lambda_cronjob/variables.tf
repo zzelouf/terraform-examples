@@ -31,6 +31,7 @@ variable "schedule_expression" {
 variable "function_zipfile" {
   description = "Path to a ZIP file that will be installed as the Lambda function (e.g., \"my-cronjob.zip\")"
   type        = string
+  default     = "lambda.zip"
 }
 
 variable "function_s3_bucket" {
