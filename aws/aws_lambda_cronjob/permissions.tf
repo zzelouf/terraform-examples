@@ -45,25 +45,26 @@ resource "aws_iam_role_policy_attachment" "logging" {
   policy_arn = aws_iam_policy.logging[0].arn
 }
 
-# CloudWatch Event Rule for scheduled invocation
-resource "aws_cloudwatch_event_rule" "this" {
+# EventBridge rule for scheduled invocation
+resource "aws_cloudwatch_event_rule" "schedule" {
   name                = "${local.prefix_with_name}---scheduled-invocation"
+  description         = "Triggers ${var.cronjob_name} on a schedule"
   schedule_expression = var.schedule_expression
   tags                = var.tags
 }
 
-# Target Lambda function for the scheduled event
+# EventBridge target — invoke Lambda on schedule
 resource "aws_cloudwatch_event_target" "lambda" {
-  rule      = aws_cloudwatch_event_rule.this.name
-  target_id = aws_cloudwatch_event_rule.this.name
+  rule      = aws_cloudwatch_event_rule.schedule.name
+  target_id = aws_cloudwatch_event_rule.schedule.name
   arn       = local.function_arn
 }
 
-# Allow CloudWatch Events to invoke Lambda
-resource "aws_lambda_permission" "allow_cloudwatch" {
+# Allow EventBridge to invoke Lambda
+resource "aws_lambda_permission" "allow_eventbridge" {
   statement_id  = "${local.prefix_with_name}---scheduled-invocation"
   action        = "lambda:InvokeFunction"
   function_name = local.function_id
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.this.arn
+  source_arn    = aws_cloudwatch_event_rule.schedule.arn
 }
