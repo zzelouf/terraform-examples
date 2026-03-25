@@ -1,14 +1,3 @@
-# State moves for renamed resources
-moved {
-  from = aws_cloudwatch_event_rule.this
-  to   = aws_cloudwatch_event_rule.schedule
-}
-
-moved {
-  from = aws_lambda_permission.allow_cloudwatch
-  to   = aws_lambda_permission.allow_eventbridge
-}
-
 # Lambda execution role
 resource "aws_iam_role" "this" {
   name = local.prefix_with_name
@@ -57,7 +46,7 @@ resource "aws_iam_role_policy_attachment" "logging" {
 }
 
 # EventBridge rule for scheduled invocation
-resource "aws_cloudwatch_event_rule" "schedule" {
+resource "aws_cloudwatch_event_rule" "this" {
   name                = "${local.prefix_with_name}---scheduled-invocation"
   description         = "Triggers ${var.cronjob_name} on a schedule"
   schedule_expression = var.schedule_expression
@@ -65,17 +54,17 @@ resource "aws_cloudwatch_event_rule" "schedule" {
 }
 
 # EventBridge target — invoke Lambda on schedule
-resource "aws_cloudwatch_event_target" "lambda" {
-  rule      = aws_cloudwatch_event_rule.schedule.name
-  target_id = aws_cloudwatch_event_rule.schedule.name
+resource "aws_cloudwatch_event_target" "this" {
+  rule      = aws_cloudwatch_event_rule.this.name
+  target_id = aws_cloudwatch_event_rule.this.name
   arn       = local.function_arn
 }
 
 # Allow EventBridge to invoke Lambda
-resource "aws_lambda_permission" "allow_eventbridge" {
+resource "aws_lambda_permission" "this" {
   statement_id  = "${local.prefix_with_name}---scheduled-invocation"
   action        = "lambda:InvokeFunction"
   function_name = local.function_id
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.schedule.arn
+  source_arn    = aws_cloudwatch_event_rule.this.arn
 }
