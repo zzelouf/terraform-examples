@@ -1,3 +1,14 @@
+# State moves for renamed resources
+moved {
+  from = aws_cloudwatch_event_rule.this
+  to   = aws_cloudwatch_event_rule.schedule
+}
+
+moved {
+  from = aws_lambda_permission.allow_cloudwatch
+  to   = aws_lambda_permission.allow_eventbridge
+}
+
 # Lambda execution role
 resource "aws_iam_role" "this" {
   name = local.prefix_with_name
