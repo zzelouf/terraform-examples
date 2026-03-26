@@ -60,11 +60,3 @@ resource "aws_cloudwatch_event_target" "this" {
   arn       = local.function_arn
 }
 
-# Allow EventBridge to invoke Lambda
-resource "aws_lambda_permission" "this" {
-  statement_id  = "${local.prefix_with_name}---scheduled-invocation"
-  action        = "lambda:InvokeFunction"
-  function_name = local.function_id
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.this.arn
-}
